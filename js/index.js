@@ -1,12 +1,14 @@
 window.onload = function(){start()};
   var map;
+  var bullet=[], bulletNum=0;
   var player={
     x : 0,
     y : 0,
     width : 10,
     height : 10, 
     speed : 10,
-    ammo : 10
+    ammo : 10, 
+    weapon : "pistol", 
   } 
   
   var moveLeft, moveUp, moveRight, moveDown;
@@ -54,9 +56,9 @@ function move(direction)
   {
     player.y+=player.speed
   }
-  else if(direction=="fire")
+  else if(direction=="shoot")
   {
-    fire(fromPlayer);
+    fire("fromPlayer",player.weapon);
   }
   return;
 }
@@ -86,9 +88,35 @@ function collisionCheck()
   }
 }
 
-function fire(subject)
+function bulletMaker(subject, type)
 {
-  
+  switch(type)
+  {
+    case "pistol" :
+      {
+        this.speed = 0.1;
+        this.colour = "yellow";
+        this.x = player.x+player.width;
+        this.y = player.y+player.height/2;
+        this.width = 5;
+        this.height = 2;
+      }
+  }
+}
+
+function fire(subject, weapontype)
+{
+  switch(subject)
+  {
+    case "fromPlayer" :
+      if(player.ammo!=0)
+      {
+        bullet[bulletNum] = new bulletMaker("fromPlayer" , weapontype);
+        bulletNum+=1;
+        console.log(bullet[bulletNum-1])
+      }
+      break;
+  }
 }
 
 function game()
@@ -100,17 +128,22 @@ function renderGame()
 {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   printMap();
-  printPlayer(player.x,player.y,player.width,player.height);
+  printHuman();
+  printBullet();
 }
 
 function printMap()
 {
   ctx.fillStyle="green"
   ctx.fillRect(0,0,canvas.width,canvas.height)
-  console.log(player.x +","+ player.y)
 }
 
-function printPlayer(x, y, width, height)
+function printHuman()
+{
+  drawHuman(player.x,player.y,player.width,player.height,"player")
+}
+
+function drawHuman(x, y, width, height, type)
 {
   var head = {} ;
   head.y = y;
@@ -131,9 +164,19 @@ function printPlayer(x, y, width, height)
   leg.height = height-head.height-body.height;
   
   ctx.fillStyle = "#f0d792";
-  ctx.fillRect(head.x,head.y,head.width,head.height)
-  ctx.fillStyle = "#145bcc"
-  ctx.fillRect(body.x,body.y,body.width, body.height)
-  ctx.fillStyle= "#996305"
+  ctx.fillRect(head.x,head.y,head.width,head.height);
+  ctx.fillStyle = "#145bcc";
+  ctx.fillRect(body.x,body.y,body.width, body.height);
+  ctx.fillStyle= "#996305";
   ctx.fillRect(leg.x,leg.y,leg.width,leg.height)
+}
+
+function printBullet()
+{
+  for(i=0;i<bulletNum;i++)
+  {
+    ctx.fillstyle=bullet[i].colour;
+    ctx.fillRect(bullet[i].x,bullet[i].y,bullet[i].width,bullet[i].height);
+    bullet[i].x+=bullet[i].speed;
+  }
 }
