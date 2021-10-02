@@ -1,0 +1,32 @@
+#gamescreen
+{
+  border: 1px solid black;
+}
+
+#controller
+{
+  background-color: gray;
+  border: 2px solid black;
+  width: 100%;
+  height: auto;
+  height: auto;
+  padding: auto;
+}
+
+#controller div
+{
+  background-color: black;
+  color: white;
+  border: 1px solid black;
+  font-size: 50px;
+  display: inline-block;
+  padding: auto;
+  width: 23%;
+  height: 70px;
+}
+
+#controller #shoot
+{
+  background-color: red;
+  width: 80%;
+}
