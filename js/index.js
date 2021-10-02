@@ -1,17 +1,21 @@
 window.onload = function(){start()};
-  //var map=[canvas.width][canvas.height]
+  var map;
   var player={
     x : 0,
     y : 0,
     width : 10,
     height : 10, 
-    speed : 10
+    speed : 10,
+    ammo : 10
   } 
+  
+  var moveLeft, moveUp, moveRight, moveDown;
 
 function start()
 {
   canvas = document.getElementById("gamescreen")
   ctx = canvas.getContext("2d")
+  map = [canvas.width][canvas.height]
   
   player.x=canvas.width/2;
   player.y=canvas.height/2;
@@ -31,23 +35,60 @@ function move(direction)
   button.style.color="white";
   }, 250);
   
+  collisionCheck();
+  
   //Mendeteksi tombol mana yang ditekan dan menggerakan objek player
-  if(direction=="left" && player.x!=0)
+  if(direction=="left" && moveLeft)
   {
     player.x-=player.speed
   }
-  else if(direction=="up" && player.y!=0)
+  else if(direction=="up" && moveUp)
   {
     player.y-=player.speed
   }
-  else if(direction=="right" && player.x<canvas.width-player.speed)
+  else if(direction=="right" && moveRight)
   {
     player.x+=player.speed;
   }
-  else if(direction=="down" && player.y<canvas.height-player.speed)
+  else if(direction=="down" && moveDown)
   {
     player.y+=player.speed
   }
+  else if(direction=="fire")
+  {
+    fire(fromPlayer);
+  }
+  return;
+}
+
+function collisionCheck()
+{
+  moveLeft = true;
+  moveUp = true;
+  moveRight = true;
+  moveDown = true;
+  
+  if(player.x<player.speed)
+  {
+    moveLeft=false;
+  }
+  if(player.y<player.speed)
+  {
+    moveUp=false;
+  }
+  if(player.x>=(canvas.width-player.speed)) 
+  {
+    moveRight=false;
+  }
+  if(player.y>=canvas.width-player. speed)
+  {
+    moveDown=false;
+  }
+}
+
+function fire(subject)
+{
+  
 }
 
 function game()
@@ -66,6 +107,7 @@ function printMap()
 {
   ctx.fillStyle="green"
   ctx.fillRect(0,0,canvas.width,canvas.height)
+  console.log(player.x +","+ player.y)
 }
 
 function printPlayer(x, y, width, height)
@@ -94,5 +136,4 @@ function printPlayer(x, y, width, height)
   ctx.fillRect(body.x,body.y,body.width, body.height)
   ctx.fillStyle= "#996305"
   ctx.fillRect(leg.x,leg.y,leg.width,leg.height)
-  
 }
