@@ -175,7 +175,7 @@ function printBullet()
 {
   for(i=0;i<bulletNum;i++)
   {
-    ctx.fillstyle=bullet[i].colour;
+    ctx.fillStyle=bullet[i].colour;
     ctx.fillRect(bullet[i].x,bullet[i].y,bullet[i].width,bullet[i].height);
     bullet[i].x+=bullet[i].speed;
   }
