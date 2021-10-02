@@ -1,5 +1,5 @@
 window.onload = function(){start()};
-  var map;
+  var gameObject=[], numberOfGameObjects=1;
   var bullet=[], bulletNum=0;
   var player={
     x : 0,
@@ -7,8 +7,10 @@ window.onload = function(){start()};
     width : 10,
     height : 10, 
     speed : 10,
+    speed : 10,
     ammo : 10, 
-    weapon : "pistol", 
+    weapon : "pistol",
+    canFire : true,
   } 
   
   var moveLeft, moveUp, moveRight, moveDown;
@@ -17,17 +19,34 @@ function start()
 {
   canvas = document.getElementById("gamescreen")
   ctx = canvas.getContext("2d")
-  map = [canvas.width][canvas.height]
   
   player.x=canvas.width/2;
   player.y=canvas.height/2;
+  
+  gameObject[0]=
+  {
+    x: 150,
+    y: 100,
+    width : 50,
+    height : 10,
+    collision : true
+  }
+  gameObject[1]=
+  {
+    x: 150,
+    y: 110,
+    width : 10,
+    height : 40,
+    collision : true
+  }
+  
+  collisionCheck(player);
   
   setInterval(game, 1)
 } 
 
 function move(direction)
 {
-  //Efek kedip pada tombol yang ditekan
   var button=document.getElementById(direction)
   button.style.backgroundColor="white";
   button.style.color="black"
@@ -37,9 +56,6 @@ function move(direction)
   button.style.color="white";
   }, 250);
   
-  collisionCheck();
-  
-  //Mendeteksi tombol mana yang ditekan dan menggerakan objek player
   if(direction=="left" && moveLeft)
   {
     player.x-=player.speed
@@ -56,36 +72,43 @@ function move(direction)
   {
     player.y+=player.speed
   }
-  else if(direction=="shoot")
+  else if(direction=="shoot" && player.canFire)
   {
     fire("fromPlayer",player.weapon);
   }
+  
+  collisionCheck(player);
+
   return;
 }
 
-function collisionCheck()
+function collisionCheck(subject)
 {
   moveLeft = true;
   moveUp = true;
   moveRight = true;
   moveDown = true;
   
-  if(player.x<player.speed)
+  for(i=0;i<=numberOfGameObjects;i++)
   {
-    moveLeft=false;
-  }
-  if(player.y<player.speed)
-  {
-    moveUp=false;
-  }
-  if(player.x>=(canvas.width-player.speed)) 
-  {
-    moveRight=false;
-  }
-  if(player.y>=canvas.width-player. speed)
-  {
-    moveDown=false;
-  }
+    if(subject.x<subject.width || gameObject[i].x+gameObject[i].width==subject.x && subject.y>=gameObject[i].y && subject.y<gameObject[i].y+gameObject[i].height && gameObject[i].collision)
+    {
+      moveLeft=false;
+    }
+    if(subject.y<subject.height ||  gameObject[i].y+gameObject[i].height==subject.y && subject.x>=gameObject[i].x && subject.x<gameObject[i].x+gameObject[i].width && gameObject[i].collision)
+    {
+      moveUp=false;
+    }
+    if(subject.x>=canvas.width-subject.width ||  gameObject[i].x == subject.x+subject.width && subject.y>=gameObject[i].y && subject.y<gameObject[i].y+gameObject[i].height && gameObject[i].collision)  
+    {
+      moveRight=false;
+    }
+    if(subject.y>=canvas.width-subject.width || gameObject[i].y==subject.y+subject.height && subject.x>=gameObject[i].x && subject.x<gameObject[i].x+gameObject[i].width && gameObject[i].collision)
+    {
+      moveDown=false;
+    }
+  } 
+  debug();
 }
 
 function bulletMaker(subject, type)
@@ -94,7 +117,7 @@ function bulletMaker(subject, type)
   {
     case "pistol" :
       {
-        this.speed = 0.1;
+        this.speed = 0.5;
         this.colour = "yellow";
         this.x = player.x+player.width;
         this.y = player.y+player.height/2;
@@ -106,6 +129,7 @@ function bulletMaker(subject, type)
 
 function fire(subject, weapontype)
 {
+  
   switch(subject)
   {
     case "fromPlayer" :
@@ -128,14 +152,25 @@ function renderGame()
 {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   printMap();
+  ctx.fillStyle="red"
+  printGameObject();
   printHuman();
   printBullet();
+  debug();
 }
 
 function printMap()
 {
   ctx.fillStyle="green"
   ctx.fillRect(0,0,canvas.width,canvas.height)
+}
+
+function printGameObject()
+{
+  for(i=0;i<=numberOfGameObjects;i++)
+  {
+    ctx.fillRect(gameObject[i].x,gameObject[i].y,gameObject[i].width,gameObject[i].height)
+  }
 }
 
 function printHuman()
@@ -180,3 +215,17 @@ function printBullet()
     bullet[i].x+=bullet[i].speed;
   }
 }
+
+function debug()
+{
+  var debugBox=document.getElementById("debugbox");
+  debugBox.innerHTML=
+  "<b>Player position</b> <br>"+
+  "X : "+player.x+"<br>"+
+  "Y : "+player.y+"<br>"+
+  "<b>Player moveable direction</b> <br>"+
+  "Left : "+moveLeft+"<br>"+
+  "Up : "+moveUp+"<br>"+
+  "Right : "+moveRight+"<br>"+
+  "Down : "+moveDown
+} 
