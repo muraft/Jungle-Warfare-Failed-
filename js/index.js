@@ -1,15 +1,17 @@
 window.onload = function(){start()};
+  var canvas, ctx
   var gameObject=[], numberOfGameObjects=1;
   var bullet=[], bulletNum=0;
   var player={
+    player : true, 
     x : 0,
     y : 0,
     width : 10,
     height : 10, 
     speed : 10,
-    speed : 10,
     ammo : 10, 
-    weapon : "pistol",
+    activeWeapon: "pistol",
+    pistolBullet: 10,
     canFire : true,
   } 
   
@@ -74,7 +76,7 @@ function move(direction)
   }
   else if(direction=="shoot" && player.canFire)
   {
-    fire("fromPlayer",player.weapon);
+    fire(player,player.activeWeapon);
   }
   
   collisionCheck(player);
@@ -116,29 +118,27 @@ function bulletMaker(subject, type)
   switch(type)
   {
     case "pistol" :
+      if(subject.pistolBullet!=0)
       {
-        this.speed = 0.5;
-        this.colour = "yellow";
-        this.x = player.x+player.width;
-        this.y = player.y+player.height/2;
-        this.width = 5;
-        this.height = 2;
-      }
+      this.speed = 0.5;
+      this.colour = "yellow";
+      this.x = player.x+player.width;
+      this.y = player.y+player.height/2;
+      this.width = 5;
+      this.height = 2;
+      subject.pistolBullet-=1
+      } 
+      break;
   }
 }
 
 function fire(subject, weapontype)
 {
-  
-  switch(subject)
+  switch(subject.player)
   {
-    case "fromPlayer" :
-      if(player.ammo!=0)
-      {
-        bullet[bulletNum] = new bulletMaker("fromPlayer" , weapontype);
-        bulletNum+=1;
-        console.log(bullet[bulletNum-1])
-      }
+    case true :
+      bullet[bulletNum] = new bulletMaker(subject , weapontype);
+      bulletNum+=1;
       break;
   }
 }
@@ -152,7 +152,9 @@ function renderGame()
 {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   printMap();
-  ctx.fillStyle="red"
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "yellow";
+  ctx.fillText("bullet : "+player.pistolBullet,0,20)
   printGameObject();
   printHuman();
   printBullet();
@@ -167,6 +169,7 @@ function printMap()
 
 function printGameObject()
 {
+  ctx.fillStyle = "brown"
   for(i=0;i<=numberOfGameObjects;i++)
   {
     ctx.fillRect(gameObject[i].x,gameObject[i].y,gameObject[i].width,gameObject[i].height)
