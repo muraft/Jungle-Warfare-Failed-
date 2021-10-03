@@ -5,10 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/index.css">
   <script src="js/index.js"></script>
-  <title>Game Test</title>
+  <title>Jungle Warfare</title>
 </head>
 <body align="center">
-	<h1>Game Test</h1>
+	<div id="status">
+	  <div id="playerstatus">
+	    
+	  </div>
+	  <div id="weaponstatus">
+	    <img id="weaponimage" src="media/image/pistol.png"/>
+	    <div id="weaponinfo"></div>
+	  </div>
+	</div>
 	<canvas id="gamescreen" width="300" height="300"></canvas>
 	<div id="controller">
 	  <div id="left" onclick="move('left')" >&lArr;</div>
