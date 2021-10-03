@@ -1,5 +1,6 @@
 window.onload = function(){start()};
   var canvas, ctx
+  var cooldownPercentage, timeBefore, totalTime
   var gameObject=[], numberOfGameObjects=1;
   var bullet=[], bulletNum=0;
   var player={
@@ -12,7 +13,7 @@ window.onload = function(){start()};
     ammo : 10, 
     activeWeapon: "pistol",
     pistolBullet: 10,
-    canFire : true,
+    fireCooldown : 0,
   } 
   
   var moveLeft, moveUp, moveRight, moveDown;
@@ -74,7 +75,7 @@ function move(direction)
   {
     player.y+=player.speed
   }
-  else if(direction=="shoot" && player.canFire)
+  else if(direction=="shoot" && player.fireCooldown==0)
   {
     fire(player,player.activeWeapon);
   }
@@ -118,7 +119,7 @@ function bulletMaker(subject, type)
   switch(type)
   {
     case "pistol" :
-      if(subject.pistolBullet!=0)
+      if(subject.pistolBullet!=0 )
       {
       this.speed = 0.5;
       this.colour = "yellow";
@@ -126,7 +127,8 @@ function bulletMaker(subject, type)
       this.y = player.y+player.height/2;
       this.width = 5;
       this.height = 2;
-      subject.pistolBullet-=1
+      subject.fireCooldown = 100;
+      subject.pistolBullet-=1;
       } 
       break;
   }
@@ -145,20 +147,61 @@ function fire(subject, weapontype)
 
 function game()
 {
+  statusChange();
   renderGame();
+}
+
+function statusChange()
+{
+  gunCooldown(player);
+}
+
+function gunCooldown(subject)
+{
+  
+  if(subject==player)
+  {
+    //console.log(timeBefore+" "+subject.fireCooldown)
+    if(timeBefore==0 && subject.fireCooldown>0)
+    {
+      totalTime=subject.fireCooldown
+    }
+    cooldownPercentage=subject.fireCooldown/totalTime*100
+  }
+  
+  if(subject.fireCooldown>0)
+  {
+    subject.fireCooldown-=1;
+  }
+  timeBefore=subject.fireCooldown
 }
 
 function renderGame()
 {
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  printStatus();
   printMap();
-  ctx.font = "20px Arial";
-  ctx.fillStyle = "yellow";
-  ctx.fillText("bullet : "+player.pistolBullet,0,20)
   printGameObject();
   printHuman();
   printBullet();
   debug();
+}
+
+function printStatus()
+{
+  var weaponInfo = document.getElementById("weaponinfo")
+  if(player.activeWeapon=="pistol") 
+  {
+    weaponInfo.innerHTML=
+    "<b> Glock <b> <br>"+
+    "<font color='yellow'>"+player.pistolBullet+"</font>";
+  } 
+  
+  var weaponImage=document.getElementById("weaponimage");
+  {
+    var imageHeight=100-cooldownPercentage;
+    weaponImage.style.height=imageHeight+"%";
+  }
 }
 
 function printMap()
@@ -230,5 +273,6 @@ function debug()
   "Left : "+moveLeft+"<br>"+
   "Up : "+moveUp+"<br>"+
   "Right : "+moveRight+"<br>"+
-  "Down : "+moveDown
+  "Down : "+moveDown+"<br>"+
+  timeBefore+" "+player.fireCooldown
 } 
