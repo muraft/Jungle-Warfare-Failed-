@@ -4,7 +4,7 @@ window.onload = function(){start()};
  var canvas, ctx
   var moveLeft, moveUp, moveRight, moveDown;
   var cooldownPercentage, timeBefore, totalTime
-  var gameObject=[], numberOfGameObjects=1;
+  var gameObject=[], numberOfGameObjects=2;
   var bullet=[], bulletNum=0;
   var player=
   {
@@ -22,6 +22,8 @@ window.onload = function(){start()};
 
 function start()
 {
+  alert("Welcome to Jungle Warfare \n This game hasn't finished yet \n So you can only enjoy walk around the map and try to shoot some boxes ^_^")
+  
   //Basic canvas preparation
   canvas = document.getElementById("gamescreen")
   ctx = canvas.getContext("2d")
@@ -34,18 +36,29 @@ function start()
   gameObject[0]=
   {
     x: 150,
-    y: 100,
-    width : 50,
+    y: 180,
+    width : 10,
     height : 10,
-    collision : true
+    collision : true, 
+    passBullet : false
   }
   gameObject[1]=
   {
     x: 150,
     y: 110,
     width : 10,
-    height : 40,
-    collision : true
+    height : 10,
+    collision : true, 
+    passBullet : false
+  }
+  gameObject[2]=
+  {
+    x: 200,
+    y: 110,
+    width : 10,
+    height : 10,
+    collision : true, 
+    passBullet : false 
   }
   
   //Checking if there are any collisions near the player
@@ -268,7 +281,7 @@ function printHuman()
   drawHuman(player.x,player.y,player.width,player.height,"player")
 }
 
-//Function that construct human like pixel art
+//Function that construct human like a pixel art
 function drawHuman(x, y, width, height, type)
 {
   var head = {} ;
@@ -297,14 +310,34 @@ function drawHuman(x, y, width, height, type)
   ctx.fillRect(leg.x,leg.y,leg.width,leg.height)
 }
 
-//Function that print all the bullet to the screen, and move the bullet position based on the bullet speed
+//Function that print all the bullet to the screen, move the bullet position based on the bullet speed, and checking if the bullet is heading toward a collision
 function printBullet()
 {
+  //Loop to get all the array index of bullet[]
   for(i=0;i<bulletNum;i++)
   {
+    //Print the bullet to the screen
     ctx.fillStyle=bullet[i].colour;
     ctx.fillRect(bullet[i].x,bullet[i].y,bullet[i].width,bullet[i].height);
-    bullet[i].x+=bullet[i].speed;
+    
+    //Checking if the bullet is heading toward a collision
+    //Loop to get every array index of gameObject
+    for(j=0;j<=numberOfGameObjects;j++)
+    {
+      //Check if the bullet collide with the collision
+      if(bullet[i].x+bullet[i].width>=gameObject[j].x && bullet[i].x+bullet[i].width<=gameObject[j].x+gameObject[j].width && bullet[i].y>=gameObject[j].y && bullet[i].y<=gameObject[j].y+gameObject[j].height && !gameObject[j].passBullet)
+      {
+        //Make the bullet dissapear (actually it just move the bullet to the edge of the screen)
+        bullet[i].x=canvas.width;
+        //Make the collision destroyed/dissapear (This just also move the bullet to the edge of the screen)
+        gameObject[j].x=canvas.width
+      }
+      else
+      {
+        bullet[i].x+=bullet[i].speed;
+      } 
+    } 
+    
   }
 }
 
