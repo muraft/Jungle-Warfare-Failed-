@@ -1,9 +1,13 @@
 window.onload = function(){start()};
-  var canvas, ctx
+ 
+ //Declare some variables that will be used globally
+ var canvas, ctx
+  var moveLeft, moveUp, moveRight, moveDown;
   var cooldownPercentage, timeBefore, totalTime
   var gameObject=[], numberOfGameObjects=1;
   var bullet=[], bulletNum=0;
-  var player={
+  var player=
+  {
     player : true, 
     x : 0,
     y : 0,
@@ -15,17 +19,18 @@ window.onload = function(){start()};
     pistolBullet: 10,
     fireCooldown : 0,
   } 
-  
-  var moveLeft, moveUp, moveRight, moveDown;
 
 function start()
 {
+  //Basic canvas preparation
   canvas = document.getElementById("gamescreen")
   ctx = canvas.getContext("2d")
   
+  //Placing the player to the middle of the map when the game started
   player.x=canvas.width/2;
   player.y=canvas.height/2;
   
+  //Add some collisions for testing purpose
   gameObject[0]=
   {
     x: 150,
@@ -43,13 +48,17 @@ function start()
     collision : true
   }
   
+  //Checking if there are any collisions near the player
   collisionCheck(player);
   
+  //Repeatly run the game function every 0,001 second
   setInterval(game, 1)
 } 
 
+//This function will be executed when the user touched one of the game button
 function move(direction)
 {
+  //Add blink effect in the button which touched by the user
   var button=document.getElementById(direction)
   button.style.backgroundColor="white";
   button.style.color="black"
@@ -59,6 +68,7 @@ function move(direction)
   button.style.color="white";
   }, 250);
   
+  //Checking which move button direction did the user touch and checking is it permissible to move into that direction
   if(direction=="left" && moveLeft)
   {
     player.x-=player.speed
@@ -75,23 +85,30 @@ function move(direction)
   {
     player.y+=player.speed
   }
+  
+  //Checking if the player touched the fire button and checking if the weapon used is not in cooldown condition
   else if(direction=="shoot" && player.fireCooldown==0)
   {
     fire(player,player.activeWeapon);
   }
   
+  //Check if there are any collisions nearby the player
   collisionCheck(player);
 
   return;
 }
 
+//Function for checking any collisions nearby
 function collisionCheck(subject)
 {
+  //Set all move directions are true(Permissible) as a default condition
   moveLeft = true;
   moveUp = true;
   moveRight = true;
   moveDown = true;
   
+  //Checking if there are any collisions nearby the player. If there are any, the move direction toward the collision will be set as false(Impermissible)
+  //The loop is for checking the entire game objects and their position, and wether the game objects are collision or not
   for(i=0;i<=numberOfGameObjects;i++)
   {
     if(subject.x<subject.width || gameObject[i].x+gameObject[i].width==subject.x && subject.y>=gameObject[i].y && subject.y<gameObject[i].y+gameObject[i].height && gameObject[i].collision)
@@ -111,13 +128,33 @@ function collisionCheck(subject)
       moveDown=false;
     }
   } 
+  //Print debug
   debug();
 }
 
+//Function when the player or someone want to fire
+function fire(subject, weapontype)
+{
+  //Checking who is wanted to fire
+  switch(subject.player)
+  {
+    //If the subject is the player
+    case true :
+      //Creating a new bullet[] object
+      bullet[bulletNum] = new bulletMaker(subject , weapontype);
+      //Adding 1 to the bulletNum, so the next bullet[] object will has different array index
+      bulletNum+=1;
+      break;
+  }
+}
+
+//Function that create a bullet[] object
 function bulletMaker(subject, type)
 {
+  //checking the type of the gun
   switch(type)
   {
+    //If the gun is pistol, the bullet will set with the pistol bullet specification
     case "pistol" :
       if(subject.pistolBullet!=0 )
       {
@@ -134,51 +171,52 @@ function bulletMaker(subject, type)
   }
 }
 
-function fire(subject, weapontype)
-{
-  switch(subject.player)
-  {
-    case true :
-      bullet[bulletNum] = new bulletMaker(subject , weapontype);
-      bulletNum+=1;
-      break;
-  }
-}
-
+//Function that execute other functions that important for the game
 function game()
 {
+  //Fuction that change game status or variables
   statusChange();
+  //Function that display every game object to the canvas screen
   renderGame();
 }
 
 function statusChange()
 {
+  //Call a function that will reduce the guncooldown time
   gunCooldown(player);
 }
 
 function gunCooldown(subject)
 {
-  
+  //If the subject is player, the percentage of cooldown progress will be created
   if(subject==player)
   {
-    //console.log(timeBefore+" "+subject.fireCooldown)
+    //If the subject fire cooldown was 0 before, and now it's more than zero
     if(timeBefore==0 && subject.fireCooldown>0)
     {
+      //That subject fire cooldown will be the maximum time of the cooldown
       totalTime=subject.fireCooldown
     }
+    //Calculating the percentage of cooldown progress (Cooldown time now divided by the maximum time of the cooldown, then multiplied by 100)
     cooldownPercentage=subject.fireCooldown/totalTime*100
   }
   
+  //If the cooldown time more than 0, the cooldown time will being reduced until 0
   if(subject.fireCooldown>0)
   {
     subject.fireCooldown-=1;
   }
+  //Asign the fire cooldown to the timeBefore, so when thos function executed again, it will know what was the amount of the subject fire cooldown before
   timeBefore=subject.fireCooldown
 }
 
+//Function that display every game object to the canvas screen
 function renderGame()
 {
+  //Clear the entire canvas, so when the object reprinted with the new position, its old image won't be shown
   ctx.clearRect(0,0,canvas.width,canvas.height);
+  
+  //Every functions print every different category of game object 
   printStatus();
   printMap();
   printGameObject();
@@ -187,8 +225,10 @@ function renderGame()
   debug();
 }
 
+//Print player status to the status UI
 function printStatus()
 {
+  //Showing weapon image based on the player's active weapon
   var weaponInfo = document.getElementById("weaponinfo")
   if(player.activeWeapon=="pistol") 
   {
@@ -197,6 +237,7 @@ function printStatus()
     "<font color='yellow'>"+player.pistolBullet+"</font>";
   } 
   
+  //Change the weapon image height based on cooldown progress
   var weaponImage=document.getElementById("weaponimage");
   {
     var imageHeight=100-cooldownPercentage;
@@ -204,12 +245,14 @@ function printStatus()
   }
 }
 
+//Function that print map or game background
 function printMap()
 {
   ctx.fillStyle="green"
   ctx.fillRect(0,0,canvas.width,canvas.height)
 }
 
+//Function that print all thing in the gameObject[]
 function printGameObject()
 {
   ctx.fillStyle = "brown"
@@ -219,11 +262,13 @@ function printGameObject()
   }
 }
 
+//Function that print humanoid object
 function printHuman()
 {
   drawHuman(player.x,player.y,player.width,player.height,"player")
 }
 
+//Function that construct human like pixel art
 function drawHuman(x, y, width, height, type)
 {
   var head = {} ;
@@ -252,6 +297,7 @@ function drawHuman(x, y, width, height, type)
   ctx.fillRect(leg.x,leg.y,leg.width,leg.height)
 }
 
+//Function that print all the bullet to the screen, and move the bullet position based on the bullet speed
 function printBullet()
 {
   for(i=0;i<bulletNum;i++)
@@ -262,6 +308,7 @@ function printBullet()
   }
 }
 
+//Function that print debug about the game for testing purpose
 function debug()
 {
   var debugBox=document.getElementById("debugbox");
